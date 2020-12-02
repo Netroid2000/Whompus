@@ -25,6 +25,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     private JButton bReiniciar;
     private JButton mover;
     private BufferedImage img;
+    private Timer time;
     
     
     public Principal() {
@@ -32,7 +33,6 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
         this.initComponents();
         this.myInitComponents();
         this.tablero = new Tablero(this.jpTablero, this.jpInterfaz);
-        
         try{
             img = ImageIO.read(new FileInputStream("Images/Jugador.png"));
         } catch (IOException e){
@@ -155,6 +155,11 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("Reiniciar")){
+            
+            if(time != null){
+                time.stop();
+            }
+            
             this.jpTablero.removeAll();
             
             this.tablero = new Tablero(this.jpTablero, this.jpInterfaz);
@@ -165,7 +170,20 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
         }
         
         if(e.getActionCommand().equals("Mover")){
-            this.jugar();
+            
+            time = new Timer(1000, (ActionListener)->{
+                if(!tablero.ganaste){
+                    
+                    this.jugar();
+                    repaint();
+                    
+                }else{
+                    time.stop();
+                }
+                
+            });
+            time.start();
+            System.out.println("Acabo");
         }
     }
     
@@ -173,9 +191,11 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     public void paint(Graphics g){
        super.paint(g);
         //x=20 y=70
+        
        int x = ((tablero.jugador.getX()-1)*(this.jpTablero.getWidth()/8))+30;
        int y = ((tablero.jugador.getY()-1)*(this.jpTablero.getHeight()/8))+80;
        g.drawImage(this.img,x, y,50,50, null);
+       
     }
     
     public void jugar(){
@@ -183,48 +203,41 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
         if(tablero != null){
             int menor = 1000;
             Casilla casMenor = null;
-                while(!tablero.ganaste){
+                
                     if(tablero.jugador != null){
-                        
-                        
-                        //busca la casilla optima
-                        
-                        if(tablero.jugador.der != null && (tablero.jugador.der.getH() + tablero.g) < menor){
-                            menor = (tablero.jugador.der.getH() + tablero.g);
-                            casMenor = tablero.jugador.der;
-                        }
-                        if(tablero.jugador.aba != null && (tablero.jugador.aba.getH() + tablero.g) < menor){
-                            menor = (tablero.jugador.aba.getH() + tablero.g);
-                            casMenor = tablero.jugador.aba;
-                        }
-                        if(tablero.jugador.izq != null && (tablero.jugador.izq.getH() + tablero.g) < menor){
-                            menor = (tablero.jugador.izq.getH() + tablero.g);
-                            casMenor = tablero.jugador.izq;
-                        }
-                        if(tablero.jugador.arr != null && (tablero.jugador.arr.getH() + tablero.g) < menor){
-                            menor = (tablero.jugador.arr.getH() + tablero.g);
-                            casMenor = tablero.jugador.arr;
-                        }
-
-                        tablero.redNeuronal.agregarConexion(casMenor, menor);
-                        tablero.jugador = casMenor;
-                        if(tablero.jugador != null && tablero.jugador.getTipo() == 5){
-                            tablero.ganaste = true;
-                        }
-                       
-                        this.repaint();
-                        
-                        System.out.println("enttro");
-                        menor = 1000;
-                        
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
+                      
+                            //busca la casilla optima
+                            
+                            if(tablero.jugador.der != null && (tablero.jugador.der.getH() + tablero.g) < menor){
+                                menor = (tablero.jugador.der.getH() + tablero.g);
+                                casMenor = tablero.jugador.der;
+                            }
+                            if(tablero.jugador.aba != null && (tablero.jugador.aba.getH() + tablero.g) < menor){
+                                menor = (tablero.jugador.aba.getH() + tablero.g);
+                                casMenor = tablero.jugador.aba;
+                            }
+                            if(tablero.jugador.izq != null && (tablero.jugador.izq.getH() + tablero.g) < menor){
+                                menor = (tablero.jugador.izq.getH() + tablero.g);
+                                casMenor = tablero.jugador.izq;
+                            }
+                            if(tablero.jugador.arr != null && (tablero.jugador.arr.getH() + tablero.g) < menor){
+                                menor = (tablero.jugador.arr.getH() + tablero.g);
+                                casMenor = tablero.jugador.arr;
+                            }
+                            
+                            tablero.redNeuronal.agregarConexion(casMenor, menor);
+                            tablero.jugador = casMenor;
+                            if(tablero.jugador != null && tablero.jugador.getTipo() == 5){
+                                tablero.ganaste = true;
+                            }
+                            
+                            System.out.println("enttro");
+                            menor = 1000;
+                            
                         
                     }
-                }
+                    
+                
         }   
     
     }
